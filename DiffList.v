@@ -31,6 +31,23 @@ Section BooleanValuedFunction.
 
   Compute union Nat.eqb (1 :: 2 :: 3 :: 4 :: nil) (1 :: 2 :: 4 :: 8 :: nil).
 
+  (* l1 ∩ l2 *)
+  Fixpoint intersection {A : Type} (eqb : A -> A -> bool) (l1 l2 : list A) :=
+    match l1 with
+    | x :: xs => if elem eqb l2 x then x :: intersection eqb xs l2 else intersection eqb xs l2
+    | nil => nil
+    end.
+  Compute intersection Nat.eqb (1 :: 2 :: 3 :: 5 :: 6 :: nil) (2 :: 4 :: 5 :: nil).
+
+  Goal forall (A : Type) (eqb : A -> A -> bool) (a : A) (l1 l2 : list A),
+      eqb a a = true ->
+      intersection eqb (a :: l1) (a :: l2) = a :: intersection eqb l1 (a :: l2).
+  Proof.
+    intros A eqb a l1 l2 H.
+    simpl.
+    now rewrite H.
+  Qed.
+  
   (* l1 \ l2 *)
   Fixpoint sub {A : Type} (eqb : A -> A -> bool) (l1 l2 : list A) :=
     match l1 with
@@ -53,4 +70,4 @@ Require Import Extraction.
 Extraction Language Haskell.
 Extract Inductive list => "([])" ["[]" "(:)"].
 Extract Inductive bool => "Prelude.Bool" ["Prelude.True" "Prelude.False"].
-Extraction "difflist.hs" union sub.
+Extraction "difflist.hs" union intersection sub.
